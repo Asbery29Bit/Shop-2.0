@@ -1,6 +1,3 @@
-```yaml
-theme: /
-
 state: Приветствие
     q!: $regex</start>
     a: Здравствуйте! Чем могу помочь?
@@ -19,32 +16,16 @@ state: Обработка_первого_ответа
     q!: * # Ответ пользователя
     script:
         var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-        // Определяем параметры растения по запросу
+        // Определяем размер растения по запросу
         $session.selectedSize = userInput.match(/большой|средний|маленький/i) ? userInput.match(/большой|средний|маленький/i)[0] : null;
-        $session.selectedType = userInput.match(/дерево|цветок/i) ? userInput.match(/дерево|цветок/i)[0] : null;
-        $session.myResult = "Ответьте на пару наших вопросов, и мы подберем растение!";
-    a: {{ $session.myResult }}
-    go: /Уточнение_цвета
-    event: noMatch || toState = "./"
-
-state: Уточнение_цвета
-    a: Какой цвет растения вы бы хотели? Например, зеленый, белый, красный и т.д.
-    q!: * # Пользовательский текст
-    script:
-        var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-        var colorMatch = userInput.match(/зеленый|белый|красный|синий|желтый/i);
-
-        if (colorMatch) {
-            $session.selectedColor = colorMatch[0];
-            $session.myResult = "Вы выбрали цвет: " + $session.selectedColor + ".";
-            $session.retryColor = false;
+        if ($session.selectedSize) {
+            $session.myResult = "Вы выбрали размер: " + $session.selectedSize + ". Подбираем растения.";
         } else {
-            $session.myResult = "Я не распознал цвет. Пожалуйста, укажите цвет растения.";
-            $session.retryColor = true; // Флаг, что цвет не распознан
+            $session.myResult = "Пожалуйста, уточните размер растения (например, большой, средний, маленький).";
         }
     a: {{ $session.myResult }}
-    go: $session.retryColor ? /Уточнение_цвета : /Предложение
-    event: noMatch || toState = "/Уточнение_цвета"
+    go: /Предложение
+    event: noMatch || toState = "/Обработка_первого_ответа"
 
 state: Предложение
     script:
@@ -58,21 +39,19 @@ state: Предложение
             { name: "Каландивия", color: "желтый", size: "маленький", type: "цветок", care: "легкий" }
         ];
 
-        // Фильтрация растений по цвету, размеру и типу
+        // Фильтрация растений по размеру
         var filteredPlants = plants.filter(function(plant) {
-            return (!$session.selectedColor || plant.color === $session.selectedColor) &&
-                   (!$session.selectedSize || plant.size === $session.selectedSize) &&
-                   (!$session.selectedType || plant.type === $session.selectedType);
+            return (!$session.selectedSize || plant.size === $session.selectedSize);
         });
 
         if (filteredPlants.length > 0) {
             var plantNames = filteredPlants.map(function(plant) {
                 return plant.name;
             }).join(", ");
-            $session.myResult = "Мы можем предложить вам следующие растения: " + plantNames + ". Хотите добавить их в корзину?";
+            $session.myResult = "Мы можем предложить вам следующие растения с размером " + $session.selectedSize + ": " + plantNames + ". Хотите добавить их в корзину?";
             $session.suggestedPlants = filteredPlants; // Сохраняем предложенные растения в сессии
         } else {
-            $session.myResult = "К сожалению, нет доступных растений с такими параметрами.";
+            $session.myResult = "К сожалению, нет доступных растений с таким размером.";
         }
     a: {{ $session.myResult }}
     go: /Корзина
@@ -112,4 +91,3 @@ state: Корзина
         }
     a: {{ $session.myResult }}
     event: noMatch || toState = "./"
-```
