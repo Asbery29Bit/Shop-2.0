@@ -1,5 +1,5 @@
-theme: /  # Указываем тему в начале
-
+theme: /
+  
 state: Приветствие
   q!: $regex</start>
   random:
@@ -13,10 +13,9 @@ state: Выбор_растения
   a: Отлично! Напишите, что вы ищете: "цветок" или "дерево".
   buttons:
     "Назад" -> /Приветствие
-  toState: /Выбор_по_типу  # Переход в следующее состояние
 
 state: Выбор_по_типу
-  q!: *  # Пользовательский ввод
+  q!: *
   script:
     var userInput = $parseTree.text ? $parseTree.text.toString().toLowerCase() : '';  # Преобразуем в строку
     var plants = [
