@@ -14,7 +14,7 @@ theme: /
       "Назад" -> /Приветствие
 
   state: Выбор_по_типу
-    q!: * # Пользовательский ввод
+    q!: *  # Пользовательский ввод
     script:
       var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
       var plants = [
@@ -92,3 +92,4 @@ theme: /
     a: {{ $session.myResult }}
     buttons:
       "Назад" -> /Приветствие
+      "Выбрать другое" -> /Выбор_растения
