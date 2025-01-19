@@ -1,3 +1,5 @@
+theme: /
+
 require: function.js
 
 state: Cart
