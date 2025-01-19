@@ -1,14 +1,14 @@
 theme: /
 
     state: Приветствие
-      q!: $regex</start>
-      a: Здравствуйте! Чем могу помочь?
-      go: /Обработка_первого_ответа
-      buttons:
-        - "Наш сайт: https://elovpark.ru/"
-        - "Корзина"
-      intent: /sys/aimylogic/ru/parting
-      event: noMatch || go: /Завершение
+        q!: $regex</start>
+          a: Здравствуйте! Чем могу помочь?
+          go: /Обработка_первого_ответа
+          buttons:
+            - "Наш сайт: https://elovpark.ru/"
+            - "Корзина"
+          intent: /sys/aimylogic/ru/parting
+          event: noMatch || go: /Завершение
     
     state: Завершение
       a: До свидания! Обращайтесь еще.
