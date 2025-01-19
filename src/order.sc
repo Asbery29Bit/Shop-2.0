@@ -1,4 +1,5 @@
 sc
+require: function.js
 state: Cart
     intent!: /корзина
     a: Ваша корзина:
