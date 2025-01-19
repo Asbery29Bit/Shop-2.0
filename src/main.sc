@@ -1,6 +1,5 @@
-sc
-     require: plants.csv
-     require: order.sc
+require: plants.csv
+require: order.sc
 
 theme: /
 
