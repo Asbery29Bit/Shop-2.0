@@ -26,17 +26,3 @@ function getTotalSum() {
 }
 
 function editText(messageId, text) {
-    var $response = $jsapi.context().response;
-    var reply = {
-        type: "raw",
-        body: {
-            text: text,
-            message_id: messageId,
-            reply_markup: {
-                "resize_keyboard": false,
-            }
-        },
-        method: "editMessageText"
-    };
-
-    $response
