@@ -5,8 +5,10 @@ theme: /
         a: Здравствуйте! Чем могу помочь?
         go: /Обработка ответа
         buttons:
-            {text: "Наш сайт", url: "https://elovpark.ru/"}
-            "Корзина" -> /Корзина
+            - text: "Наш сайт"
+              url: "https://elovpark.ru/"
+            - text: "Корзина"
+              action: /Корзина
         intent: /sys/aimylogic/ru/parting || toState = "/Проверка"
         event: noMatch || toState = "/Обработка ответа"
 
@@ -19,7 +21,7 @@ theme: /
             $session.selectedType = userInput.match(/дерево|цветок/i) ? userInput.match(/дерево|цветок/i)[0] : '';
             $session.myResult = "Ответьте на пару наших вопросов, и мы подберем растение!";
         a: {{ $session.myResult }}
-        go!: /Уточнение цвета
+        go: /Уточнение цвета
         event: noMatch || toState = "./"
     
     state: Уточнение цвета
