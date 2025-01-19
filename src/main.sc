@@ -5,10 +5,8 @@ theme: /
         a: Здравствуйте! Чем могу помочь?
         go: /Обработка ответа
         buttons:
-            - text: "Наш сайт"
-              url: "https://elovpark.ru/"
-            - text: "Корзина"
-              action: /Корзина
+            - { text: "Наш сайт", url: "https://elovpark.ru/" }
+            - { text: "Корзина", action: "/Корзина" }
         intent: /sys/aimylogic/ru/parting || toState = "/Проверка"
         event: noMatch || toState = "/Обработка ответа"
 
