@@ -1,27 +1,44 @@
-sc
 require: order.sc
 
 theme: /
 
-state: Main
-    q: (.*)
-    script:
-        var query = $request.query;
-        var results = [];
-        for (var i = 0; i < plants.length; i++) \{
-            var plant = plants[i];
-            if (query.includes(plant.name) || query.includes(plant.attributes.type) || query.includes(plant.attributes.care)) \{
-                results.push(plant);
-            \}
-        \}
-        if (results.length > 0) \{
-            $reactions.answer("Мы нашли следующие растения для вас:");
-            for (var j = 0; j < results.length; j++) \{
-                var result = results[j];
-                $reactions.answer(result.name + " - " + result.attributes.price + " руб.");
-            \}
-        \} else \{
-            $reactions.answer("К сожалению, мы не нашли подходящих растений.");
-        \}
+state: Приветствие
+    q!: $regex</start>
+    random: 
+        a: Добрый день!
+        a: Здравствуй друг, купи растеньице
     buttons:
-        "Корзина" -> /Cart
+        {text: "Наш сайт", url: "https://elovpark.ru/"}
+    buttons:
+        "Выбрать растение" -> /Фильтры
+    intent: /sys/aimylogic/ru/parting || toState = "/Проверка"
+    event: noMatch || toState = "./"
+
+state: Не понял
+    event!: noMatch
+    a: Извините, я не понял.
+
+state: Поиск растения
+    intent: /Поиск растений || toState = "./"
+    event: noMatch || toState = "./"
+    a: Пожалуйста, опишите, что бы вы хотели?
+
+state: Фильтры
+    q: * @Размер * || toState = "/Фильтры"
+    event: noMatch || toState = "/Фильтры"
+    q: * @Цена * || toState = "/Фильтры"
+    a: Вы можете написать название желаемого растения или же выбрать растение по одному из следующих критериев:
+        - Размер (большой, средний, маленький)
+        - Цена
+        - Световые условия (тень, полутень, умеренные, ярко)
+        - Цвет
+        - Частота полива (регулярная, редкая, умеренная)
+        - Температура (прохладная, комнатная, теплая)
+    q: * @Световые_условия * || toState = "/Фильтры"
+    q: * @Температура * || toState = "/Фильтры"
+    q: * @Цвет * || toState = "/Проверка"
+    q: * @Частота_полива * || toState = "/Фильтры"
+
+state: Проверка
+    a: Например: 
+    // Здесь можно добавить дополнительные примеры или подсказки для пользователя
