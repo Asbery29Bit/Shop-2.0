@@ -1,110 +1,73 @@
 theme: /
 
-  state: Приветствие
-    q!: $regex</start>
-    a: Здравствуйте! Чем могу помочь?
-    go: {state: /Обработка_первого_ответа}
-    buttons:
-      - "Наш сайт: https://elovpark.ru/"
-      - "Корзина"
-    intent: /sys/aimylogic/ru/parting
-    event: noMatch || go: {state: /Завершение}
-  
-  state: Завершение
-    a: До свидания! Обращайтесь еще.
-    script: $reactions.finish("bye")
-  
-  state: Обработка_первого_ответа
-    q!: * # Ответ пользователя
-    script:
-      var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-      $session.selectedSize = userInput.match(/большой|средний|маленький/i) ? userInput.match(/большой|средний|маленький/i)[0] : null;
-      $session.selectedType = userInput.match(/дерево|цветок/i) ? userInput.match(/дерево|цветок/i)[0] : null;
-      $session.myResult = "Ответьте на пару наших вопросов, и мы подберем растение!"
-    a: {{ $session.myResult }}
-    go: {state: /Уточнение_цвета}
-    event: noMatch || go: {state: /Обработка_первого_ответа}
-  
-  state: Уточнение_цвета
-    a: Какой цвет растения вы бы хотели? Например, зеленый, белый, красный и т.д.
-    q!: * # Пользовательский текст
-    script:
-      var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-      var colorMatch = userInput.match(/зеленый|белый|красный|синий|желтый/i);
+    state: Приветствие
+        q!: $regex</start>
+        a: Здравствуйте! Чем могу помочь?
+        go: /Обработка ответа
+        buttons:
+            {text: "Наш сайт", url: "https://elovpark.ru/"}
+            "Корзина" -> /Корзина
+        intent: /sys/aimylogic/ru/parting || toState = "/Проверка"
+        event: noMatch || toState = "/Обработка ответа"
 
-      if (colorMatch) {
-        $session.selectedColor = colorMatch[0];
-        $session.myResult = "Вы выбрали цвет: " + $session.selectedColor + ".";
-        $session.retryColor = false;
-      } else {
-        $session.myResult = "Я не распознал цвет. Пожалуйста, укажите цвет растения.";
-        $session.retryColor = true;
-      }
-    a: {{ $session.myResult }}
-    go: $session.retryColor ? {state: /Уточнение_цвета} : {state: /Предложение}
-    event: noMatch || go: {state: /Уточнение_цвета}
-  
-  state: Предложение
-    script:
-      var plants = [
-        { name: "Фикус", color: "зеленый", size: "большой", type: "дерево", care: "легкий" },
-        { name: "Монстера", color: "зеленый", size: "большой", type: "дерево", care: "средний" },
-        { name: "Спатифиллум", color: "белый", size: "средний", type: "цветок", care: "легкий" },
-        { name: "Антуриум", color: "красный", size: "средний", type: "цветок", care: "средний" },
-        { name: "Гортензия", color: "синий", size: "средний", type: "цветок", care: "средний" },
-        { name: "Каландивия", color: "желтый", size: "маленький", type: "цветок", care: "легкий" }
-      ];
+    state: Обработка ответа
+        q!: * # Ответ пользователя
+        script:
+            var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
+            $session.recipient = userInput.match(/бабу*|сын*|внучк*|самого себя|себе/i) ? userInput.match(/бабушки|сын|внучка|самого себя/i)[0] : "неизвестному получателю";
+            $session.myResult = "Ответьте на пару наших вопросов и мы подберем цветок для " + $session.recipient + ".";
+        a: {{ $session.myResult }}
+        go!: /Уточнение цвета
+        event: noMatch || toState = "./"
 
-      var filteredPlants = plants.filter(function(plant) {
-        return (!$session.selectedColor || plant.color === $session.selectedColor) &&
-               (!$session.selectedSize || plant.size === $session.selectedSize) &&
-               (!$session.selectedType || plant.type === $session.selectedType);
-      });
+    state: Уточнение цвета
+        a: Какой цвет цветка вы бы хотели?
+        q!: * # Пользовательский текст
+        script:
+            var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
+            var colorMatch = userInput.match(/зеленый|белый|красный|синий|желтый/i);
+            
+            if (colorMatch) {
+                $session.selectedColor = colorMatch[0];
+                $session.myResult = "Вы выбрали цвет: " + $session.selectedColor + ".";
+            } else {
+                $session.myResult = "Я не распознал цвет. Пожалуйста, укажите цвет растения.";
+            }
+        a: {{ $session.myResult }}
+        go: /Уточнение размера
+        event: noMatch || toState = "./"
 
-      if (filteredPlants.length > 0) {
-        var plantNames = filteredPlants.map(function(plant) {
-          return plant.name;
-        }).join(", ");
-        $session.myResult = "Мы можем предложить вам следующие растения: " + plantNames + ". Хотите добавить их в корзину?";
-        $session.suggestedPlants = filteredPlants;
-      } else {
-        $session.myResult = "К сожалению, нет доступных растений с такими параметрами.";
-      }
-    a: {{ $session.myResult }}
-    go: {state: /Корзина}
-    event: noMatch || go: {state: /Корзина}
-  
-  state: Корзина
-    a: Что вы хотите сделать с выбранными растениями? Добавить в корзину, посмотреть корзину или продолжить выбор?
-    q!: * # Ответ пользователя
-    script:
-      var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-      if (userInput.includes('добавить')) {
-        if ($session.suggestedPlants && $session.suggestedPlants.length > 0) {
-          $session.cart = $session.cart || [];
-          $session.cart = $session.cart.concat($session.suggestedPlants);
-          $session.myResult = "Растения добавлены в корзину.";
-          delete $session.suggestedPlants;
-        } else {
-          $session.myResult = "Нет растений для добавления в корзину.";
-        }
-        toState("./");
-      } else if (userInput.includes('посмотреть')) {
-        if ($session.cart && $session.cart.length > 0) {
-          var cartItems = $session.cart.map(function(plant) {
-            return plant.name;
-          }).join(", ");
-          $session.myResult = "В вашей корзине: " + cartItems + ". Что вы хотите сделать дальше?";
-        } else {
-          $session.myResult = "Ваша корзина пуста.";
-        }
-        toState("./");
-      } else if (userInput.includes('продолжить')) {
-        $session.myResult = "Давайте продолжим выбор.";
-        go: {state: /Обработка_первого_ответа};
-      } else {
-        $session.myResult = "Пожалуйста, уточните, хотите ли вы добавить растения в корзину, посмотреть корзину или продолжить выбор.";
-        toState("./");
-      }
-    a: {{ $session.myResult }}
-    event: noMatch || toState = "/"
+    state: Уточнение размера
+        a: Какого размера цветок вы бы хотите?
+        q!: * # Пользовательский текст
+        script:
+            var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
+            var sizeMatch = userInput.match(/большой|средний|маленький/i);
+            
+            if (sizeMatch) {
+                $session.selectedSize = sizeMatch[0];
+                var availablePlants = [
+                    { name: "Маленький зеленый кактус", color: "зеленый", size: "маленький" },
+                    { name: "Маленький белый цветок", color: "белый", size: "маленький" },
+                    { name: "Маленький красный цветок", color: "красный", size: "маленький" }
+                ];
+                
+                var matchingPlants = availablePlants.filter(function(plant) {
+                    return plant.color === $session.selectedColor && plant.size === $session.selectedSize;
+                });
+
+                if (matchingPlants.length > 0) {
+                    var plantNames = matchingPlants.map(function(plant) {
+                        return plant.name;
+                    }).join(", ");
+                    $session.myResult = "Мы можем предложить вам следующие цветы для " + $session.recipient + ": " + plantNames + ". Хотите добавить их в корзину?";
+                    $session.selectedPlants = matchingPlants;
+                } else {
+                    $session.myResult = "К сожалению, нет доступных растений с такими параметрами.";
+                }
+                
+                return { toState: "/Предложение" };
+            } else {
+                $session.myResult = "Я не распознал размер. Пожалуйста, укажите размер растения.";
+                return { toState: "/Уточнение размера" };
+            }
