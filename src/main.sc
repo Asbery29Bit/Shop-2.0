@@ -1,3 +1,4 @@
+```yaml
 theme: /
 
 state: Приветствие
@@ -111,3 +112,4 @@ state: Корзина
         }
     a: {{ $session.myResult }}
     event: noMatch || toState = "./"
+```
