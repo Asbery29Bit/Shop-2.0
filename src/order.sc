@@ -1,4 +1,3 @@
-```sc
 require: function.js
 
 state: Cart
@@ -6,19 +5,18 @@ state: Cart
     a: Ваша корзина:
     script:
         $temp.totalSum = 0;
-        for (var i = 0; i < $session.cart.length; i++) \{
-            var item = $session.cart i;
+        for (var i = 0; i < $session.cart.length; i++) {
+            var item = $session.cart[i];
             $reactions.answer(item.name + " - " + item.price + " руб.");
             $temp.totalSum += item.price;
-        \}
+        }
         $reactions.answer("Общая сумма: " + $temp.totalSum + " руб.");
     buttons:
-        \{text: "Оформить заказ", request_contact: true\}
-        "Меню" -> /Main
+        {text: "Оформить заказ", request_contact: true}
+        "Меню" -> /Приветствие
 
 state: GetPhoneNumber
     event: telegramSendContact
     script:
         $client.phonenumber = $request.rawRequest.message.contact.phonenumber;
-    a: Спасибо! Наш менеджер свяжется с вами по номеру телефона \{\{ $client.phone_number \}\}.
-```
+    a: Спасибо! Наш менеджер свяжется с вами по номеру телефона {{ $client.phonenumber }}.
