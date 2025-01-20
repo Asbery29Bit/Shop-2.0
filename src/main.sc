@@ -26,16 +26,16 @@ theme: /
         
         
         state: Уточнение цвета
-        intent!: /Уточнение цвета
-        script:
-            $session.color = $parseTree.Цвет;
-        if: $session.color == undefined
-            a: Я не понял. Вы сказали: {{$request.query}}
-            go!: /Уточнение цвета
-        else: 
-            a: ваш цвет {{$session.color}}
-            go!: /Уточнение размера
-        event: noMatch || toState = "./"
+            intent!: /Уточнение цвета
+            script:
+                $session.color = $parseTree.Цвет;
+            if: $session.color == undefined
+                a: Я не понял. Вы сказали: {{$request.query}}
+                go!: /Уточнение цвета
+            else: 
+                a: ваш цвет {{$session.color}}
+                go!: /Уточнение размера
+            event: noMatch || toState = "./"
         
         
         
