@@ -24,10 +24,10 @@ theme: /
     
     state: Уточнение цвета
         q!: * # Пользовательский текст
-        intent!: /Уточнение цвета
+        intent!:/Уточнение цвета
         script:
-           $session.color = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-           if ($session.color) {
+           var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
+           if (!userInput) {
                $session.myResult = "Пожалуйста, укажите цвет растения.";
            } else {
                var colorMatch = userInput.match(/зеленый|белый|красный|синий|желтый|розовый/i);
@@ -44,6 +44,23 @@ theme: /
         a: Какого размера цветок вы бы хотели?
         go: /Уточнение размера
         event: noMatch || toState = "./"
+        
+        
+        state: Уточнение цвета
+        intent!: /Уточнение цвета
+        script:
+            $session.color = $parseTree._Color;
+        if: $session.color == undefined
+            a: Я не понял. Вы сказали: {{$request.query}}
+            go!: /Уточнение цвета
+        else: 
+            a: ваш цвет {{$session.color}}
+            go!: /Уточнение размера
+        event: noMatch || toState = "./"
+        
+        
+        
+        
     
     state: Уточнение размера
         q!: * # Пользовательский текст
