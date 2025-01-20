@@ -22,28 +22,7 @@ theme: /
         go: /Уточнение цвета
         event: noMatch || toState = "./"
     
-    state: Уточнение цвета
-        q!: * # Пользовательский текст
-        intent!:/Уточнение цвета
-        script:
-           var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-           if (!userInput) {
-               $session.myResult = "Пожалуйста, укажите цвет растения.";
-           } else {
-               var colorMatch = userInput.match(/зеленый|белый|красный|синий|желтый|розовый/i);
-               
-               if (colorMatch) {
-                   $session.selectedColor = colorMatch[0];
-                   $session.myResult = "Вы выбрали цвет: " + $session.selectedColor + ".";
-               } else {
-                   $session.myResult = "Я не распознал цвет. Пожалуйста, укажите один из следующих цветов: зеленый, белый, красный, синий, желтый, розовый.";
-                   return { toState: "/Уточнение цвета" };
-               }
-           }
-        a: {{ $session.myResult }}
-        a: Какого размера цветок вы бы хотели?
-        go: /Уточнение размера
-        event: noMatch || toState = "./"
+
         
         
         state: Уточнение цвета
