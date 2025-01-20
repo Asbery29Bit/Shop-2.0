@@ -3,10 +3,11 @@ theme: /
     state: Приветствие
         q!: $regex</start>
         a: Здравствуйте! Чем могу помочь?
-        go: /Обработка ответа
         buttons:
             {text: "Наш сайт", url: "https://elovpark.ru/"}
             "Корзина" -> /Корзина
+            "Оформление заказа" -> /Оформление заказа
+        go: /Оформление заказа
         intent: /sys/aimylogic/ru/parting || toState = "/Проверка"
         event: noMatch || toState = "/Обработка ответа"
     
@@ -14,55 +15,68 @@ theme: /
         q!: * # Ответ пользователя
         script:
             var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-            // Определяем, для кого нужны цветы
-            $session.recipient = userInput.match(/бабу*|сын*|внучк*|самого себя|себе/i) ? userInput.match(/бабушки|сын|внучка|самого себя|себе|бабушка|внучке|сыну|самому себе/i)[0] : "неизвестному получателю";
-            $session.myResult = "Ответьте на пару наших вопросов и мы подберем растение для " + $session.recipient + ".";
+                // Определяем, для кого нужны цветы
+                $session.recipient = userInput.match(/бабу*|сын*|внучк*|самого себя|себе/i) ? userInput.match(/бабушки|сын|внучка|самого себя|себе|бабушка|внучке|сыну|самому себе/i)[0] : "неизвестному получателю";
+                $session.myResult = "Ответьте на пару наших вопросов и мы подберем растение для " + $session.recipient + ".";
         a: {{ $session.myResult }}
-        a: Какой цвет растения вы бы хотели?
-        go: /Уточнение цвета
+        go!: /Запрос цвета
         event: noMatch || toState = "./"
-    
+        
+    state: Оформление заказа
+        intent!: /Оформление заказа
+        script:
+            $session.recipient = $parseTree._recipient;
+        if: $session.recipient == undefined
+            a: Ответьте на пару наших вопросов, и мы подберем растение для неизвестного получателя.
+            go!: /Запрос цвета
+        else: 
+            a: Ответьте на пару наших вопросов, и мы подберем растение для {{$session.recipient}}
+            go!: /Запрос цвета
+        event: noMatch || toState = "./"
 
         
+    
+    state: Запрос цвета
+        a: Какого цвета растение вы бы хотели?
+        buttons:
+            "Не указывать" -> /Уточнение размера
+        intent: /Уточнение цвета || toState = "/Уточнение цвета"
+        event: noMatch || toState = "./"
         
     state: Уточнение цвета
-        intent!: /Уточнение цвета
+        intent: /Уточнение цвета
         script:
-            $session.color = $parseTree._Color;
+            $session.color = $parseTree._color;
         if: $session.color == undefined
             a: Я не понял. Вы сказали: {{$request.query}}
-            go!: /Уточнение цвета
+            go!: /Запрос цвета
         else: 
-            a: ваш цвет {{$session.color}}
+            a: вы выбрали цвет {{$session.color}}
             go!: /Уточнение размера
         event: noMatch || toState = "./"
         
         
-        
-        
     
-    state: Уточнение размера
-        q!: * # Пользовательский текст
-        script:
-            var userInput = $parseTree.text ? $parseTree.text.toLowerCase() : '';
-            if (!userInput) {
-                $session.myResult = "Пожалуйста, укажите размер растения.";
-                return { toState: "/Уточнение размера" }; // Повторяем вопрос
-            } else {
-                var sizeMatch = userInput.match(/большой|средний|маленький/i);
-                
-                if (sizeMatch) {
-                       $session.selectedSize = sizeMatch[0];
-                       $session.myResult = "Вы выбрали размер: " + $session.selectedSize + ".";
-                   } else {
-                       $session.myResult = "Я не распознал размер. Пожалуйста, укажите один из следующих размеров: маленький, средний, большой.";
-                       return { toState: "/Уточнение размера" };
-                   }
-            }
-        a: {{ $session.myResult }}
-        a: Какой тип растения вы бы хотели?
-        go: /Уточнение типа
+    state: Запрос размера
+        a: Какого размера растение вы бы хотели?
+        buttons:
+            "Не указывать" -> /Уточнение типа
+        intent: /Уточнение размера || toState = "/Уточнение размера"
         event: noMatch || toState = "./"
+        
+    state: Уточнение размера
+        intent: /Уточнение размера
+        script:
+            $session.size = $parseTree._Размер;
+        if: $session.size == undefined
+            a: Я не понял. Вы сказали: {{$request.query}}
+            go!: /Запрос размера
+        else: 
+            a: вы выбрали размер {{$session.size}}
+            go!: /Уточнение типа
+        event: noMatch || toState = "./"
+        
+        
     
     state: Уточнение типа
         q!: * # Пользовательский текст

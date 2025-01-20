@@ -12,6 +12,7 @@
     "extendedSettings" : {
       "classificationAlgorithmVersion" : 1.0,
       "tokenizerEngine" : "mystem",
+      "allowedPatterns" : [ "Color" ],
       "useShared" : false
     },
     "shared" : false,
